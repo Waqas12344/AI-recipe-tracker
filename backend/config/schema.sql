@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
     ingredient_name VARCHAR(255) NOT NULL,
     quantity DECIMAL(10, 2) NOT NULL,
     unit VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- recipe nutrition table 
@@ -130,3 +130,32 @@ CREATE INDEX IF NOT EXISTS idx_shopping_list_user ON shopping_list_items(user_id
 
 
 -- function to updae updated_at timestap 
+
+CREATE OR REPLACE FUNCTION update_timestamp_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- trigger to update updated_at column on recipes table
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+FOR EACH ROW EXECUTE FUNCTION update_timestamp_at_column();
+
+CREATE TRIGGER update_user_preferences_updated_at BEFORE UPDATE ON user_preferences
+FOR EACH ROW EXECUTE FUNCTION update_timestamp_at_column();
+
+CREATE TRIGGER update_pantry_items_updated_at BEFORE UPDATE ON pantry_items
+FOR EACH ROW EXECUTE FUNCTION update_timestamp_at_column();
+
+CREATE TRIGGER update_recipes_updated_at BEFORE UPDATE ON recipes
+FOR EACH ROW EXECUTE FUNCTION update_timestamp_at_column();
+
+CREATE TRIGGER update_meal_plans_updated_at BEFORE UPDATE ON meal_plans
+FOR EACH ROW EXECUTE FUNCTION update_timestamp_at_column();
+
+CREATE TRIGGER update_shopping_list_items_updated_at BEFORE UPDATE ON shopping_list_items
+FOR EACH ROW EXECUTE FUNCTION update_timestamp_at_column();
+
