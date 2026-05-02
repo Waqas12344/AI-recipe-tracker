@@ -1,13 +1,13 @@
-import db from "../config/db";
+import db from "../config/db.js";
 import bcrypt from "bcryptjs";
 
 class User {
-  // clear a new user
+  // create a new user
   static async create({ email, password, name }) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await db.query(
-      `INSERT INTO users (email,password_hash, name) VALUES ($1,$2,$3) RETURNING id, email, name, created_at`,
+      `INSERT INTO users (email, password, username) VALUES ($1,$2,$3) RETURNING id, email, username, created_at`,
       [email, hashedPassword, name],
     );
 
@@ -25,7 +25,7 @@ class User {
 
   static async findById(id) {
     const result = await db.query(
-      "SELECT id, email, name, created_at, updated_at FROM users WHERE id = $1",
+      "SELECT id, email, username, created_at FROM users WHERE id = $1",
       [id],
     );
 
@@ -36,10 +36,10 @@ class User {
   static async update(id, updates) {
     const { name, email } = updates;
     const result = await db.query(
-      `UPDATE users SET name = COALESCE($1, name),
+      `UPDATE users SET username = COALESCE($1, username),
             email = COALESCE($2, email)
             WHERE id = $3
-            RETURNING id,email,name,updated_at`,
+            RETURNING id,email,username`,
       [name, email, id],
     );
     return result.rows[0];
@@ -49,7 +49,7 @@ class User {
   static async updatePassword(id, newPassword) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await db.query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [
+    await db.query(`UPDATE users SET password = $1 WHERE id = $2`, [
       hashedPassword,
       id,
     ]);
