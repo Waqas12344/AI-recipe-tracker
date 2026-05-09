@@ -4,7 +4,7 @@ class Recipe {
   // create a new recipe with ingredients and nutrition info
 
   static async create(userId, recipeData) {
-    const client = await db.connect();
+    const client = await db.pool.connect();
     try {
       await client.query("BEGIN");
       const {
@@ -38,7 +38,7 @@ class Recipe {
           prep_time,
           cook_time,
           servings,
-          instructions,
+          JSON.stringify(instructions),
           dietary_tags,
           user_notes,
           image_url,
@@ -63,7 +63,7 @@ class Recipe {
 
         await client.query(
           `INSERT INTO recipe_ingredients 
-                    (recipe_id, name, quantity, unit)
+                    (recipe_id, ingredient_name, quantity, unit)
                     VALUES ${ingredientValues}`,
           ingredientParams,
         );
@@ -111,7 +111,7 @@ class Recipe {
 
     // get ingredients
     const ingredientsResult = await db.query(
-      `SELECT name, quantity, unit FROM recipe_ingredients WHERE recipe_id = $1`,
+      `SELECT ingredient_name as name, quantity, unit FROM recipe_ingredients WHERE recipe_id = $1`,
       [id],
     );
 
